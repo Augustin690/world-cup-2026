@@ -8,6 +8,6 @@
     }
   },
   "enabledPlugins": {
-    "nutmeg@withqwerty": true
+    "nutmeg@withqwerty-plugins": true
   }
 }
