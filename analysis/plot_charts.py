@@ -6,13 +6,13 @@ Usage:
     python3 analysis/plot_charts.py
 """
 
-import json
 from pathlib import Path
 
 import matplotlib.pyplot as plt
-from matplotlib.ticker import MaxNLocator
+from matplotlib.ticker import MaxNLocator, PercentFormatter
 
-DATA_PATH = Path(__file__).resolve().parent.parent / "data" / "euro_to_world_cup_semifinalists.json"
+from data_utils import load_editions
+
 OUT_DIR = Path(__file__).resolve().parent.parent / "charts"
 
 SURFACE = "#fcfcfb"
@@ -27,15 +27,6 @@ RED = "#d03b3b"
 
 plt.rcParams["font.family"] = "sans-serif"
 plt.rcParams["font.sans-serif"] = ["DejaVu Sans", "Arial", "Helvetica"]
-
-
-def load_editions():
-    with DATA_PATH.open() as f:
-        editions = json.load(f)
-    for ed in editions:
-        ed["shared"] = sorted(set(ed["euro_semifinalists"]) & set(ed["world_cup_semifinalists"]))
-        ed["overlap"] = len(ed["shared"])
-    return editions
 
 
 def style_axes(ax):
@@ -120,11 +111,48 @@ def plot_distribution(editions, path):
     plt.close(fig)
 
 
+def plot_relative_overlap(editions, path):
+    values = [ed["relative_overlap"] for ed in editions]
+    max_val = max(v for v in values if v is not None)
+    colors = [RED if v == max_val else BLUE for v in values]
+
+    fig, ax = plt.subplots(figsize=(11, 4.2), dpi=200)
+    style_axes(ax)
+
+    x = range(len(editions))
+    ax.bar(x, values, width=0.62, color=colors, zorder=3)
+
+    labels = [f"'{str(ed['euro_year'])[2:]}→'{str(ed['world_cup_year'])[2:]}" for ed in editions]
+    ax.set_xticks(list(x))
+    ax.set_xticklabels(labels)
+    ax.yaxis.set_major_formatter(PercentFormatter(xmax=1, decimals=0))
+    ax.set_ylim(0, 1.18)
+
+    for i, ed in enumerate(editions):
+        v = ed["relative_overlap"]
+        label = f"{v:.0%}" if v is not None else "n/a"
+        ax.text(i, (v or 0) + 0.025, label, ha="center", va="bottom",
+                 fontsize=8.5, fontweight="bold", color=TEXT_PRIMARY)
+
+    fig.suptitle("Share of European World Cup semifinalists who were Euro semifinalists",
+                 x=0.01, ha="left", fontsize=13.5, fontweight="bold", color=TEXT_PRIMARY)
+    ax.set_title(
+        "Relative overlap = shared teams ÷ European World Cup semifinalists that year · "
+        "red = joint-highest (100%, 1962 and 2026)",
+        loc="left", fontsize=9, color=TEXT_SECONDARY, pad=10,
+    )
+
+    fig.tight_layout(rect=[0, 0, 1, 0.90])
+    fig.savefig(path, facecolor=fig.get_facecolor())
+    plt.close(fig)
+
+
 def main():
     OUT_DIR.mkdir(exist_ok=True)
     editions = load_editions()
     plot_by_edition(editions, OUT_DIR / "overlap_by_edition.png")
     plot_distribution(editions, OUT_DIR / "overlap_distribution.png")
+    plot_relative_overlap(editions, OUT_DIR / "relative_overlap_by_edition.png")
     print(f"Wrote PNGs to {OUT_DIR}")
 
 

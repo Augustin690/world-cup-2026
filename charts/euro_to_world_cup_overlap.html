@@ -144,7 +144,8 @@
     <p class="viz-sub">
       For every UEFA Euro since 1960, how many of that Euro's four semifinalists also reached
       the semifinals of the World Cup immediately after. Euro 2024 → World Cup 2026 is the only
-      edition to reach 3 — the previous ceiling was 2, hit four times.
+      edition to reach 3 — the previous ceiling was 2, hit four times. Relative to the number of
+      European teams in that World Cup's final four, though, 2026 ties 1962 at 100%.
     </p>
 
     <div class="card">
@@ -168,6 +169,19 @@
         <summary>Show data table</summary>
         <table class="data-table" id="table2">
           <thead><tr><th>Shared teams</th><th>Number of editions</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </details>
+    </div>
+
+    <div class="card">
+      <p class="card-title">Relative overlap: share of European World Cup semifinalists who carried over</p>
+      <p class="card-note">Shared teams &divide; European World Cup semifinalists that year &middot; <span class="swatch" aria-hidden="true"></span> joint-highest (100%)</p>
+      <svg id="chart3" role="img" aria-label="Bar chart of the share of European World Cup semifinalists who were Euro semifinalists the previous summer, 1960 to 2026"></svg>
+      <details class="table-toggle">
+        <summary>Show data table</summary>
+        <table class="data-table" id="table3">
+          <thead><tr><th>Euro</th><th>World Cup</th><th>Shared</th><th>European WC semifinalists</th><th>Relative overlap</th></tr></thead>
           <tbody></tbody>
         </table>
       </details>
@@ -198,9 +212,18 @@
     { euro: 2024, wc: 2026, euroTeams: ["Spain","France","Netherlands","England"], wcTeams: ["France","Spain","England","Argentina"] },
   ];
 
+  // European nations that appear as a World Cup semifinalist but never as a
+  // Euro semifinalist in this dataset (so can't be inferred from euroTeams alone).
+  const EXTRA_EUROPEAN_TEAMS = ["Poland", "Bulgaria", "Croatia"];
+  const europeanTeams = new Set(EXTRA_EUROPEAN_TEAMS);
+  editions.forEach(e => e.euroTeams.forEach(t => europeanTeams.add(t)));
+
   editions.forEach(e => {
     e.shared = e.euroTeams.filter(t => e.wcTeams.includes(t));
     e.overlap = e.shared.length;
+    e.europeanWcTeams = e.wcTeams.filter(t => europeanTeams.has(t));
+    e.europeanWcCount = e.europeanWcTeams.length;
+    e.relativeOverlap = e.europeanWcCount ? e.overlap / e.europeanWcCount : null;
   });
 
   const tooltip = document.getElementById('tooltip');
@@ -389,6 +412,88 @@
     });
   }
 
+  // ---- Chart 3: relative overlap ----
+  function renderChart3() {
+    const svg = document.getElementById('chart3');
+    const n = editions.length;
+    const band = 40, barW = 24;
+    const marginL = 34, marginR = 12, marginT = 20, marginB = 34;
+    const plotW = n * band;
+    const plotH = 210;
+    const w = marginL + plotW + marginR;
+    const h = marginT + plotH + marginB;
+    svg.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
+    svg.setAttribute('width', '100%');
+    svg.setAttribute('height', h);
+
+    const yScale = v => plotH - v * plotH; // v is a 0..1 fraction
+
+    [0, 0.25, 0.5, 0.75, 1].forEach(v => {
+      const y = marginT + yScale(v);
+      svg.appendChild(svgEl('line', { x1: marginL, x2: marginL + plotW, y1: y, y2: y, class: v === 0 ? 'baseline' : 'gridline' }));
+      const label = svgEl('text', { x: marginL - 8, y: y + 3, class: 'axis-label', 'text-anchor': 'end' });
+      escText(label, Math.round(v * 100) + '%');
+      svg.appendChild(label);
+    });
+
+    const maxVal = Math.max(...editions.map(e => e.relativeOverlap || 0));
+
+    editions.forEach((e, i) => {
+      const cx = marginL + i * band + band / 2;
+      const v = e.relativeOverlap || 0;
+      const barH = v * plotH;
+      const y = marginT + plotH - barH;
+      const isTop = e.relativeOverlap === maxVal;
+
+      const rect = svgEl('rect', {
+        x: cx - barW / 2, y: y, width: barW, height: Math.max(barH, 1),
+        rx: 4, ry: 4,
+        class: 'bar' + (isTop ? ' is-record' : ''),
+        tabindex: '0',
+        role: 'img',
+        'aria-label': `Euro ${e.euro} to World Cup ${e.wc}: ${e.relativeOverlap === null ? 'no European semifinalists' : Math.round(e.relativeOverlap * 100) + '% relative overlap'}`
+      });
+      const squareBottom = svgEl('rect', { x: cx - barW / 2, y: marginT + plotH - 4, width: barW, height: 4 });
+      squareBottom.setAttribute('style', isTop ? 'fill: var(--critical)' : 'fill: var(--series-1)');
+
+      svg.appendChild(rect);
+      if (barH > 4) svg.appendChild(squareBottom);
+
+      const pct = e.relativeOverlap === null ? 'n/a' : Math.round(e.relativeOverlap * 100) + '%';
+      const sub = `${e.overlap} of ${e.europeanWcCount} European WC semifinalist${e.europeanWcCount === 1 ? '' : 's'}` +
+        (e.shared.length ? ': ' + e.shared.join(', ') : '');
+      const onEnter = evt => showTooltip(evt, pct, `Euro ${e.euro} → World Cup ${e.wc}<br>${sub}`);
+      rect.addEventListener('pointerenter', onEnter);
+      rect.addEventListener('pointermove', positionTooltip);
+      rect.addEventListener('pointerleave', hideTooltip);
+      rect.addEventListener('focus', onEnter);
+      rect.addEventListener('blur', hideTooltip);
+
+      const vlabel = svgEl('text', { x: cx, y: y - 8, class: 'value-label', style: 'font-size: 8.5px' });
+      escText(vlabel, pct);
+      svg.appendChild(vlabel);
+
+      const xlabel = svgEl('text', { x: cx, y: marginT + plotH + 16, class: 'axis-label', 'text-anchor': 'middle' });
+      escText(xlabel, "'" + String(e.euro).slice(2));
+      svg.appendChild(xlabel);
+      const xlabel2 = svgEl('text', { x: cx, y: marginT + plotH + 27, class: 'axis-label', 'text-anchor': 'middle' });
+      escText(xlabel2, "→'" + String(e.wc).slice(2));
+      svg.appendChild(xlabel2);
+    });
+
+    const tbody = document.querySelector('#table3 tbody');
+    editions.forEach(e => {
+      const tr = document.createElement('tr');
+      const cells = [
+        String(e.euro), String(e.wc), String(e.overlap), String(e.europeanWcCount),
+        e.relativeOverlap === null ? 'n/a' : Math.round(e.relativeOverlap * 100) + '%',
+      ];
+      cells.forEach(c => { const td = document.createElement('td'); td.textContent = c; tr.appendChild(td); });
+      tbody.appendChild(tr);
+    });
+  }
+
   renderChart1();
   renderChart2();
+  renderChart3();
 </script>
