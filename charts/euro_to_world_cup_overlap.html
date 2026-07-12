@@ -1,0 +1,394 @@
+<title>Euro → World Cup Semifinalist Carryover</title>
+<style>
+  .viz-page {
+    --page-plane:      #f9f9f7;
+    --surface-1:       #fcfcfb;
+    --text-primary:    #0b0b0b;
+    --text-secondary:  #52514e;
+    --text-muted:      #898781;
+    --gridline:        #e1e0d9;
+    --baseline:        #c3c2b7;
+    --border:          rgba(11,11,11,0.10);
+    --series-1:        #2a78d6;
+    --series-1-wash:   rgba(42,120,214,0.10);
+    --good:            #0ca30c;
+    --critical:        #d03b3b;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: var(--page-plane);
+    color: var(--text-primary);
+    min-height: 100vh;
+    margin: 0;
+    padding: 32px 20px 64px;
+    box-sizing: border-box;
+  }
+  @media (prefers-color-scheme: dark) {
+    .viz-page {
+      --page-plane:      #0d0d0d;
+      --surface-1:       #1a1a19;
+      --text-primary:    #ffffff;
+      --text-secondary:  #c3c2b7;
+      --text-muted:      #898781;
+      --gridline:        #2c2c2a;
+      --baseline:        #383835;
+      --border:          rgba(255,255,255,0.10);
+      --series-1:        #3987e5;
+      --series-1-wash:   rgba(57,135,229,0.14);
+      --good:            #0ca30c;
+      --critical:        #e66767;
+    }
+  }
+  :root[data-theme="dark"] .viz-page {
+    --page-plane:      #0d0d0d;
+    --surface-1:       #1a1a19;
+    --text-primary:    #ffffff;
+    --text-secondary:  #c3c2b7;
+    --text-muted:      #898781;
+    --gridline:        #2c2c2a;
+    --baseline:        #383835;
+    --border:          rgba(255,255,255,0.10);
+    --series-1:        #3987e5;
+    --series-1-wash:   rgba(57,135,229,0.14);
+    --good:            #0ca30c;
+    --critical:        #e66767;
+  }
+  :root[data-theme="light"] .viz-page {
+    --page-plane:      #f9f9f7;
+    --surface-1:       #fcfcfb;
+    --text-primary:    #0b0b0b;
+    --text-secondary:  #52514e;
+    --text-muted:      #898781;
+    --gridline:        #e1e0d9;
+    --baseline:        #c3c2b7;
+    --border:          rgba(11,11,11,0.10);
+    --series-1:        #2a78d6;
+    --series-1-wash:   rgba(42,120,214,0.10);
+    --good:            #0ca30c;
+    --critical:        #d03b3b;
+  }
+
+  .viz-shell { max-width: 900px; margin: 0 auto; }
+  .viz-h1 { font-size: 22px; font-weight: 700; margin: 0 0 4px; }
+  .viz-sub { font-size: 14px; color: var(--text-secondary); margin: 0 0 28px; line-height: 1.5; }
+
+  .card {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 20px 12px;
+    margin-bottom: 24px;
+    overflow-x: auto;
+  }
+  .card-title { font-size: 15px; font-weight: 600; margin: 0 0 2px; }
+  .card-note { font-size: 12.5px; color: var(--text-muted); margin: 0 0 12px; }
+
+  svg { display: block; overflow: visible; }
+  .bar { fill: var(--series-1); cursor: pointer; }
+  .bar.is-record { fill: var(--critical); }
+  .bar:hover, .bar:focus { filter: brightness(1.12); outline: none; }
+  .axis-label { fill: var(--text-muted); font-size: 9.5px; }
+  .value-label { fill: var(--text-primary); font-size: 10.5px; font-weight: 600; text-anchor: middle; }
+  .gridline { stroke: var(--gridline); stroke-width: 1; }
+  .baseline { stroke: var(--baseline); stroke-width: 1; }
+  .ref-line { stroke: var(--text-muted); stroke-width: 1; stroke-dasharray: 3 3; }
+  .ref-label { fill: var(--text-muted); font-size: 10px; }
+  .annot { fill: var(--critical); font-size: 11px; font-weight: 600; }
+
+  .tooltip {
+    position: fixed;
+    pointer-events: none;
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 12px;
+    color: var(--text-primary);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+    opacity: 0;
+    transition: opacity 0.08s ease;
+    z-index: 10;
+    max-width: 220px;
+  }
+  .tooltip.visible { opacity: 1; }
+  .tooltip .tt-value { font-weight: 700; font-size: 14px; }
+  .tooltip .tt-sub { color: var(--text-secondary); margin-top: 2px; }
+
+  details.table-toggle { margin-top: 8px; }
+  details.table-toggle summary {
+    cursor: pointer;
+    font-size: 12.5px;
+    color: var(--text-secondary);
+    padding: 6px 0;
+    user-select: none;
+  }
+  table.data-table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 12.5px;
+    margin-bottom: 12px;
+  }
+  table.data-table th, table.data-table td {
+    text-align: left;
+    padding: 6px 10px;
+    border-bottom: 1px solid var(--gridline);
+    font-variant-numeric: tabular-nums;
+  }
+  table.data-table th { color: var(--text-muted); font-weight: 600; }
+
+  .legend-note { font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; margin: 0 0 14px; }
+  .swatch { width: 10px; height: 10px; border-radius: 2px; background: var(--critical); display: inline-block; }
+</style>
+
+<div class="viz-page">
+  <div class="viz-shell">
+    <h1 class="viz-h1">Euro semifinalists carrying into the next World Cup</h1>
+    <p class="viz-sub">
+      For every UEFA Euro since 1960, how many of that Euro's four semifinalists also reached
+      the semifinals of the World Cup immediately after. Euro 2024 → World Cup 2026 is the only
+      edition to reach 3 — the previous ceiling was 2, hit four times.
+    </p>
+
+    <div class="card">
+      <p class="card-title">Shared semifinalists, by edition</p>
+      <p class="card-note">Hover or focus a bar for the shared teams &middot; dashed line marks the previous record of 2, before 2026 &middot; <span class="swatch" aria-hidden="true"></span> record edition</p>
+      <svg id="chart1" role="img" aria-label="Bar chart of shared semifinalists between each Euro and the following World Cup, 1960 to 2026"></svg>
+      <details class="table-toggle">
+        <summary>Show data table</summary>
+        <table class="data-table" id="table1">
+          <thead><tr><th>Euro</th><th>World Cup</th><th>Overlap</th><th>Shared teams</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </details>
+    </div>
+
+    <div class="card">
+      <p class="card-title">Distribution of overlap sizes</p>
+      <p class="card-note">Across all 17 Euro → World Cup transitions, 1960–2026</p>
+      <svg id="chart2" role="img" aria-label="Bar chart showing how many editions had 0, 1, 2, or 3 shared semifinalists"></svg>
+      <details class="table-toggle">
+        <summary>Show data table</summary>
+        <table class="data-table" id="table2">
+          <thead><tr><th>Shared teams</th><th>Number of editions</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </details>
+    </div>
+  </div>
+</div>
+
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+  const editions = [
+    { euro: 1960, wc: 1962, euroTeams: ["USSR","Czechoslovakia","Yugoslavia","France"], wcTeams: ["Brazil","Czechoslovakia","Chile","Yugoslavia"] },
+    { euro: 1964, wc: 1966, euroTeams: ["Spain","Hungary","USSR","Denmark"], wcTeams: ["England","West Germany","Portugal","USSR"] },
+    { euro: 1968, wc: 1970, euroTeams: ["Italy","USSR","Yugoslavia","England"], wcTeams: ["Brazil","Italy","West Germany","Uruguay"] },
+    { euro: 1972, wc: 1974, euroTeams: ["West Germany","Belgium","USSR","Hungary"], wcTeams: ["West Germany","Netherlands","Poland","Brazil"] },
+    { euro: 1976, wc: 1978, euroTeams: ["Czechoslovakia","Netherlands","West Germany","Yugoslavia"], wcTeams: ["Argentina","Netherlands","Brazil","Italy"] },
+    { euro: 1980, wc: 1982, euroTeams: ["West Germany","Belgium","Czechoslovakia","Italy"], wcTeams: ["Italy","West Germany","Poland","France"] },
+    { euro: 1984, wc: 1986, euroTeams: ["France","Portugal","Spain","Denmark"], wcTeams: ["Argentina","West Germany","France","Belgium"] },
+    { euro: 1988, wc: 1990, euroTeams: ["West Germany","Netherlands","USSR","Italy"], wcTeams: ["West Germany","Argentina","Italy","England"] },
+    { euro: 1992, wc: 1994, euroTeams: ["Denmark","Netherlands","Germany","Sweden"], wcTeams: ["Brazil","Italy","Sweden","Bulgaria"] },
+    { euro: 1996, wc: 1998, euroTeams: ["Germany","England","Czech Republic","France"], wcTeams: ["France","Brazil","Croatia","Netherlands"] },
+    { euro: 2000, wc: 2002, euroTeams: ["France","Portugal","Italy","Netherlands"], wcTeams: ["Germany","Brazil","Turkey","South Korea"] },
+    { euro: 2004, wc: 2006, euroTeams: ["Greece","Czech Republic","Portugal","Netherlands"], wcTeams: ["Italy","France","Germany","Portugal"] },
+    { euro: 2008, wc: 2010, euroTeams: ["Spain","Germany","Russia","Turkey"], wcTeams: ["Spain","Netherlands","Germany","Uruguay"] },
+    { euro: 2012, wc: 2014, euroTeams: ["Spain","Italy","Germany","Portugal"], wcTeams: ["Germany","Argentina","Netherlands","Brazil"] },
+    { euro: 2016, wc: 2018, euroTeams: ["Portugal","France","Germany","Wales"], wcTeams: ["France","Croatia","Belgium","England"] },
+    { euro: 2020, wc: 2022, euroTeams: ["Italy","Spain","England","Denmark"], wcTeams: ["Argentina","France","Croatia","Morocco"] },
+    { euro: 2024, wc: 2026, euroTeams: ["Spain","France","Netherlands","England"], wcTeams: ["France","Spain","England","Argentina"] },
+  ];
+
+  editions.forEach(e => {
+    e.shared = e.euroTeams.filter(t => e.wcTeams.includes(t));
+    e.overlap = e.shared.length;
+  });
+
+  const tooltip = document.getElementById('tooltip');
+  function showTooltip(evt, valueHtml, subText) {
+    tooltip.innerHTML = '<div class="tt-value">' + valueHtml + '</div><div class="tt-sub">' + subText + '</div>';
+    tooltip.classList.add('visible');
+    positionTooltip(evt);
+  }
+  function positionTooltip(evt) {
+    const pad = 14;
+    let x = evt.clientX + pad, y = evt.clientY + pad;
+    const rect = tooltip.getBoundingClientRect();
+    if (x + rect.width > window.innerWidth - 8) x = evt.clientX - rect.width - pad;
+    if (y + rect.height > window.innerHeight - 8) y = evt.clientY - rect.height - pad;
+    tooltip.style.left = x + 'px';
+    tooltip.style.top = y + 'px';
+  }
+  function hideTooltip() { tooltip.classList.remove('visible'); }
+
+  function svgEl(tag, attrs) {
+    const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+    for (const k in attrs) el.setAttribute(k, attrs[k]);
+    return el;
+  }
+  function escText(node, text) { node.appendChild(document.createTextNode(text)); return node; }
+
+  // ---- Chart 1: overlap per edition ----
+  function renderChart1() {
+    const svg = document.getElementById('chart1');
+    const n = editions.length;
+    const band = 40, barW = 24;
+    const marginL = 28, marginR = 12, marginT = 30, marginB = 34;
+    const plotW = n * band;
+    const plotH = 210;
+    const w = marginL + plotW + marginR;
+    const h = marginT + plotH + marginB;
+    svg.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
+    svg.setAttribute('width', '100%');
+    svg.setAttribute('height', h);
+
+    const yMax = 4;
+    const yScale = v => plotH - (v / yMax) * plotH;
+
+    // gridlines + y ticks
+    for (let v = 0; v <= yMax; v++) {
+      const y = marginT + yScale(v);
+      svg.appendChild(svgEl('line', { x1: marginL, x2: marginL + plotW, y1: y, y2: y, class: v === 0 ? 'baseline' : 'gridline' }));
+      const label = svgEl('text', { x: marginL - 8, y: y + 3, class: 'axis-label', 'text-anchor': 'end' });
+      escText(label, String(v));
+      svg.appendChild(label);
+    }
+
+    // reference line at previous max (2)
+    const refY = marginT + yScale(2);
+    svg.appendChild(svgEl('line', { x1: marginL, x2: marginL + plotW, y1: refY, y2: refY, class: 'ref-line' }));
+
+    editions.forEach((e, i) => {
+      const cx = marginL + i * band + band / 2;
+      const barH = (e.overlap / yMax) * plotH;
+      const y = marginT + plotH - barH;
+      const isRecord = e.overlap === 3;
+
+      const rect = svgEl('rect', {
+        x: cx - barW / 2, y: y, width: barW, height: Math.max(barH, 1),
+        rx: 4, ry: 4,
+        class: 'bar' + (isRecord ? ' is-record' : ''),
+        tabindex: '0',
+        role: 'img',
+        'aria-label': `Euro ${e.euro} to World Cup ${e.wc}: ${e.overlap} shared semifinalist${e.overlap === 1 ? '' : 's'}${e.shared.length ? ' (' + e.shared.join(', ') + ')' : ''}`
+      });
+      // square the bottom corners: overlay a mask rect covering bottom radius
+      const squareBottom = svgEl('rect', { x: cx - barW / 2, y: marginT + plotH - 4, width: barW, height: 4, fill: 'var(--series-1)', class: isRecord ? '' : '' });
+      if (isRecord) squareBottom.setAttribute('style', 'fill: var(--critical)');
+      else squareBottom.setAttribute('style', 'fill: var(--series-1)');
+
+      svg.appendChild(rect);
+      if (barH > 4) svg.appendChild(squareBottom);
+
+      const sub = e.shared.length ? e.shared.join(', ') : 'No shared teams';
+      const onEnter = evt => showTooltip(evt, `${e.overlap} shared`, `Euro ${e.euro} → World Cup ${e.wc}<br>${sub}`);
+      rect.addEventListener('pointerenter', onEnter);
+      rect.addEventListener('pointermove', positionTooltip);
+      rect.addEventListener('pointerleave', hideTooltip);
+      rect.addEventListener('focus', onEnter);
+      rect.addEventListener('blur', hideTooltip);
+
+      if (isRecord) {
+        const vlabel = svgEl('text', { x: cx, y: y - 8, class: 'value-label' });
+        escText(vlabel, '3');
+        svg.appendChild(vlabel);
+      }
+
+      const xlabel = svgEl('text', { x: cx, y: marginT + plotH + 16, class: 'axis-label', 'text-anchor': 'middle' });
+      escText(xlabel, "'" + String(e.euro).slice(2));
+      svg.appendChild(xlabel);
+      const xlabel2 = svgEl('text', { x: cx, y: marginT + plotH + 27, class: 'axis-label', 'text-anchor': 'middle' });
+      escText(xlabel2, "→'" + String(e.wc).slice(2));
+      svg.appendChild(xlabel2);
+    });
+
+    // annotation for record bar
+    const recordIdx = editions.findIndex(e => e.overlap === 3);
+    const cx = marginL + recordIdx * band + band / 2;
+    const annot = svgEl('text', { x: cx, y: marginT - 12, class: 'annot', 'text-anchor': 'middle' });
+    escText(annot, 'First-ever 3-team carryover');
+    svg.appendChild(annot);
+
+    // table
+    const tbody = document.querySelector('#table1 tbody');
+    editions.forEach(e => {
+      const tr = document.createElement('tr');
+      const cells = [String(e.euro), String(e.wc), String(e.overlap), e.shared.join(', ') || '—'];
+      cells.forEach(c => { const td = document.createElement('td'); td.textContent = c; tr.appendChild(td); });
+      tbody.appendChild(tr);
+    });
+  }
+
+  // ---- Chart 2: distribution ----
+  function renderChart2() {
+    const svg = document.getElementById('chart2');
+    const counts = [0, 0, 0, 0];
+    editions.forEach(e => counts[e.overlap]++);
+    const labels = ['0 shared', '1 shared', '2 shared', '3 shared'];
+
+    const band = 130, barW = 64;
+    const marginL = 30, marginR = 12, marginT = 20, marginB = 30;
+    const plotW = counts.length * band;
+    const plotH = 160;
+    const w = marginL + plotW + marginR;
+    const h = marginT + plotH + marginB;
+    svg.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
+    svg.setAttribute('width', '100%');
+    svg.setAttribute('height', h);
+
+    const yMax = 10;
+    const yScale = v => plotH - (v / yMax) * plotH;
+    [0, 2, 4, 6, 8, 10].forEach(v => {
+      const y = marginT + yScale(v);
+      svg.appendChild(svgEl('line', { x1: marginL, x2: marginL + plotW, y1: y, y2: y, class: v === 0 ? 'baseline' : 'gridline' }));
+      const label = svgEl('text', { x: marginL - 8, y: y + 3, class: 'axis-label', 'text-anchor': 'end' });
+      escText(label, String(v));
+      svg.appendChild(label);
+    });
+
+    counts.forEach((c, i) => {
+      const cx = marginL + i * band + band / 2;
+      const barH = (c / yMax) * plotH;
+      const y = marginT + plotH - barH;
+      const isRecord = i === 3;
+
+      const rect = svgEl('rect', {
+        x: cx - barW / 2, y: y, width: barW, height: Math.max(barH, 1),
+        rx: 4, ry: 4,
+        class: 'bar' + (isRecord ? ' is-record' : ''),
+        tabindex: '0',
+        role: 'img',
+        'aria-label': `${labels[i]}: ${c} edition${c === 1 ? '' : 's'}`
+      });
+      const squareBottom = svgEl('rect', { x: cx - barW / 2, y: marginT + plotH - 4, width: barW, height: 4 });
+      squareBottom.setAttribute('style', isRecord ? 'fill: var(--critical)' : 'fill: var(--series-1)');
+
+      svg.appendChild(rect);
+      if (barH > 4) svg.appendChild(squareBottom);
+
+      const onEnter = evt => showTooltip(evt, `${c} edition${c === 1 ? '' : 's'}`, labels[i]);
+      rect.addEventListener('pointerenter', onEnter);
+      rect.addEventListener('pointermove', positionTooltip);
+      rect.addEventListener('pointerleave', hideTooltip);
+      rect.addEventListener('focus', onEnter);
+      rect.addEventListener('blur', hideTooltip);
+
+      const vlabel = svgEl('text', { x: cx, y: y - 8, class: 'value-label' });
+      escText(vlabel, String(c));
+      svg.appendChild(vlabel);
+
+      const xlabel = svgEl('text', { x: cx, y: marginT + plotH + 20, class: 'axis-label', 'text-anchor': 'middle' });
+      escText(xlabel, labels[i]);
+      svg.appendChild(xlabel);
+    });
+
+    const tbody = document.querySelector('#table2 tbody');
+    labels.forEach((l, i) => {
+      const tr = document.createElement('tr');
+      [l, String(counts[i])].forEach(c => { const td = document.createElement('td'); td.textContent = c; tr.appendChild(td); });
+      tbody.appendChild(tr);
+    });
+  }
+
+  renderChart1();
+  renderChart2();
+</script>
