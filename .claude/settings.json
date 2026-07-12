@@ -6,5 +6,8 @@
         "repo": "withqwerty/plugins"
       }
     }
+  },
+  "enabledPlugins": {
+    "nutmeg@withqwerty-plugins": true
   }
 }
