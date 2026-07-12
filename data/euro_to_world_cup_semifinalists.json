@@ -2,102 +2,136 @@
   {
     "euro_year": 1960,
     "euro_semifinalists": ["USSR", "Czechoslovakia", "Yugoslavia", "France"],
+    "euro_champion": "USSR",
+    "euro_runner_up": "Yugoslavia",
     "world_cup_year": 1962,
     "world_cup_semifinalists": ["Brazil", "Czechoslovakia", "Chile", "Yugoslavia"]
   },
   {
     "euro_year": 1964,
     "euro_semifinalists": ["Spain", "Hungary", "USSR", "Denmark"],
+    "euro_champion": "Spain",
+    "euro_runner_up": "USSR",
     "world_cup_year": 1966,
     "world_cup_semifinalists": ["England", "West Germany", "Portugal", "USSR"]
   },
   {
     "euro_year": 1968,
     "euro_semifinalists": ["Italy", "USSR", "Yugoslavia", "England"],
+    "euro_champion": "Italy",
+    "euro_runner_up": "Yugoslavia",
     "world_cup_year": 1970,
     "world_cup_semifinalists": ["Brazil", "Italy", "West Germany", "Uruguay"]
   },
   {
     "euro_year": 1972,
     "euro_semifinalists": ["West Germany", "Belgium", "USSR", "Hungary"],
+    "euro_champion": "West Germany",
+    "euro_runner_up": "USSR",
     "world_cup_year": 1974,
     "world_cup_semifinalists": ["West Germany", "Netherlands", "Poland", "Brazil"]
   },
   {
     "euro_year": 1976,
     "euro_semifinalists": ["Czechoslovakia", "Netherlands", "West Germany", "Yugoslavia"],
+    "euro_champion": "Czechoslovakia",
+    "euro_runner_up": "West Germany",
     "world_cup_year": 1978,
     "world_cup_semifinalists": ["Argentina", "Netherlands", "Brazil", "Italy"]
   },
   {
     "euro_year": 1980,
     "euro_semifinalists": ["West Germany", "Belgium", "Czechoslovakia", "Italy"],
+    "euro_champion": "West Germany",
+    "euro_runner_up": "Belgium",
     "world_cup_year": 1982,
     "world_cup_semifinalists": ["Italy", "West Germany", "Poland", "France"]
   },
   {
     "euro_year": 1984,
     "euro_semifinalists": ["France", "Portugal", "Spain", "Denmark"],
+    "euro_champion": "France",
+    "euro_runner_up": "Spain",
     "world_cup_year": 1986,
     "world_cup_semifinalists": ["Argentina", "West Germany", "France", "Belgium"]
   },
   {
     "euro_year": 1988,
     "euro_semifinalists": ["West Germany", "Netherlands", "USSR", "Italy"],
+    "euro_champion": "Netherlands",
+    "euro_runner_up": "USSR",
     "world_cup_year": 1990,
     "world_cup_semifinalists": ["West Germany", "Argentina", "Italy", "England"]
   },
   {
     "euro_year": 1992,
     "euro_semifinalists": ["Denmark", "Netherlands", "Germany", "Sweden"],
+    "euro_champion": "Denmark",
+    "euro_runner_up": "Germany",
     "world_cup_year": 1994,
     "world_cup_semifinalists": ["Brazil", "Italy", "Sweden", "Bulgaria"]
   },
   {
     "euro_year": 1996,
     "euro_semifinalists": ["Germany", "England", "Czech Republic", "France"],
+    "euro_champion": "Germany",
+    "euro_runner_up": "Czech Republic",
     "world_cup_year": 1998,
     "world_cup_semifinalists": ["France", "Brazil", "Croatia", "Netherlands"]
   },
   {
     "euro_year": 2000,
     "euro_semifinalists": ["France", "Portugal", "Italy", "Netherlands"],
+    "euro_champion": "France",
+    "euro_runner_up": "Italy",
     "world_cup_year": 2002,
     "world_cup_semifinalists": ["Germany", "Brazil", "Turkey", "South Korea"]
   },
   {
     "euro_year": 2004,
     "euro_semifinalists": ["Greece", "Czech Republic", "Portugal", "Netherlands"],
+    "euro_champion": "Greece",
+    "euro_runner_up": "Portugal",
     "world_cup_year": 2006,
     "world_cup_semifinalists": ["Italy", "France", "Germany", "Portugal"]
   },
   {
     "euro_year": 2008,
     "euro_semifinalists": ["Spain", "Germany", "Russia", "Turkey"],
+    "euro_champion": "Spain",
+    "euro_runner_up": "Germany",
     "world_cup_year": 2010,
     "world_cup_semifinalists": ["Spain", "Netherlands", "Germany", "Uruguay"]
   },
   {
     "euro_year": 2012,
     "euro_semifinalists": ["Spain", "Italy", "Germany", "Portugal"],
+    "euro_champion": "Spain",
+    "euro_runner_up": "Italy",
     "world_cup_year": 2014,
     "world_cup_semifinalists": ["Germany", "Argentina", "Netherlands", "Brazil"]
   },
   {
     "euro_year": 2016,
     "euro_semifinalists": ["Portugal", "France", "Germany", "Wales"],
+    "euro_champion": "Portugal",
+    "euro_runner_up": "France",
     "world_cup_year": 2018,
     "world_cup_semifinalists": ["France", "Croatia", "Belgium", "England"]
   },
   {
     "euro_year": 2020,
     "euro_semifinalists": ["Italy", "Spain", "England", "Denmark"],
+    "euro_champion": "Italy",
+    "euro_runner_up": "England",
     "world_cup_year": 2022,
     "world_cup_semifinalists": ["Argentina", "France", "Croatia", "Morocco"]
   },
   {
     "euro_year": 2024,
     "euro_semifinalists": ["Spain", "France", "Netherlands", "England"],
+    "euro_champion": "Spain",
+    "euro_runner_up": "England",
     "world_cup_year": 2026,
     "world_cup_semifinalists": ["France", "Spain", "England", "Argentina"]
   }
